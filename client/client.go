@@ -12,7 +12,7 @@ import (
 	"io/ioutil"
 	"log"
 )
-// AuthToekn 自定义认证
+// AuthToekn 自定义认证, credentials.PerRPCCredentials
 type AuthToekn struct {
 	Token string
 }
@@ -71,11 +71,18 @@ func main() {
 	// 调用Product.pb.go中的NewProdServiceClient方法
 	productServiceClient := product.NewProdServiceClient(conn)
 
-	// 3. 直接像调用本地方法一样调用GetProductStock方法
+	// 调用Product.pb.go中的GetProductStock方法
 	resp, err := productServiceClient.GetProductStock(context.Background(), &product.ProductRequest{ProdId: 2147483647})
 	if err != nil {
 		log.Fatal("调用gRPC方法错误: ", err)
 	}
-
 	fmt.Println("调用gRPC方法成功，ProdStock = ", resp.ProdStock)
+
+	// 调用token.pb.go中的SayHello方法
+	c = token.NewPingClient(conn)
+	reply, err := c.SayHello(context.Background(), &token.PingMessage{Greeting: "foo"})
+	if err != nil {
+		log.Fatal("调用gRPC方法错误: ", err)
+	}
+	log.Printf("Response from server: %s", reply.Greeting)
 }
